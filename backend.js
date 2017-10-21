@@ -68,9 +68,7 @@ const makeMove = (move, game) =>
   game
 
 
-const backend = {
+module.exports = {
   newGame: newGame,
   makeMove: makeMove
 }
-
-module.exports = backend

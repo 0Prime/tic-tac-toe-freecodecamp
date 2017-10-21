@@ -9,12 +9,10 @@ const newGame = backend.newGame()
 const makeMove = backend.makeMove
 
 /*
-TODO: game field to win conditions function for testing
-`
+TODO: make 'visualize game field' helper function:
 xo-
 xo-
 x--
-`
 */
 describe('game has correct status', () => {
   describe('`X` player wining game has `X` in it`s status', () => {
@@ -84,11 +82,3 @@ describe('player can`t play illegal moves', () => {
     })
   }
 })
-
-
-// players make moves in turns
-// each player has own type of mark
-// win condition: 3 marks in 1 row, horizontally, vertically or diagonally
-
-// ... after each move game recalculates it's state:
-// move of one of the players or win of one of players or tie
