@@ -1,7 +1,9 @@
-const { pipe, swap } = require('./tools')
+const { pipe, swap, curry } = require('./tools')
+
 
 const backend = require('./backend')
 const makeMove = backend.makeMove
+
 
 const newGame = backend.newGame()
 
@@ -13,21 +15,21 @@ x--
 */
 describe('game has correct status', () => {
   describe('`X` player wining game has `X` in it`s status', () => {
-    const testWinX = testCorrectStatus.bind(null, 'status contains `X`', 'X')
+    const testWinX = curry(testCorrectStatus, 'status contains `X`', 'X')
 
     testWinX([0, 3, 1, 4, 2])
   })
 
 
   describe('`O` player wining game has `O` in it`s status', () => {
-    const testWinO = testCorrectStatus.bind(null, 'status contains `O`', 'O')
+    const testWinO = curry(testCorrectStatus, 'status contains `O`', 'O')
 
     testWinO([0, 3, 1, 4, 6, 5])
   })
 
 
   describe('winning games`s status contains `win`', () => {
-    const testWin = testCorrectStatus.bind(null, 'status contains `win`', 'win')
+    const testWin = curry(testCorrectStatus, 'status contains `win`', 'win')
 
     testWin([0, 3, 1, 4, 2])
     testWin([0, 1, 3, 4, 6])
@@ -37,7 +39,7 @@ describe('game has correct status', () => {
 
 
   describe('ongoing game`s status contains `move`', () => {
-    const testOngoing = testCorrectStatus.bind(null, 'status contains `move`', 'move')
+    const testOngoing = curry(testCorrectStatus, 'status contains `move`', 'move')
 
     testOngoing([0])
     testOngoing([0, 1])
@@ -47,7 +49,7 @@ describe('game has correct status', () => {
   })
 
   describe('tied game`s status contains `tie`', () => {
-    const testTie = testCorrectStatus.bind(null, 'status contains `tie`', 'tie')
+    const testTie = curry(testCorrectStatus, 'status contains `tie`', 'tie')
 
     testTie([0, 1, 2, 3, 5, 4, 6, 8, 7])
     testTie([0, 1, 2, 4, 3, 5, 7, 6, 8])
@@ -71,7 +73,7 @@ describe('player can`t play illegal moves', () => {
   testIllegalMove(4, [0, 3, 1, 4, 6, 5])
 
   function testIllegalMove(illegalMove, playedMoves) {
-    it(`illegal move '${illegalMove}' is ignored, moves: ${playedMoves || "new game"}`, () => {
+    it(`illegal move '${illegalMove}' is ignored, moves: ${playedMoves || 'new game'}`, () => {
       const gameSoFar = playedMoves ? playedMoves.reduce(swap(makeMove), newGame) : newGame
       const afterIllegalMove = makeMove(illegalMove, gameSoFar)
 
