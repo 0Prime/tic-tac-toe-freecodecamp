@@ -7,12 +7,7 @@ const makeMove = backend.makeMove
 
 const newGame = backend.newGame()
 
-/*
-TODO: make 'visualize game field' helper function:
-xo-
-xo-
-x--
-*/
+
 describe('game has correct status', () => {
   describe('`X` player wining game has `X` in it`s status', () => {
     const testWinX = curry(testCorrectStatus, 'status contains `X`', 'X')
@@ -55,15 +50,15 @@ describe('game has correct status', () => {
     testTie([0, 1, 2, 4, 3, 5, 7, 6, 8])
   })
 
-  function testCorrectStatus(statement, expectedStatus, movesSequence) {
-    it(`${statement}, moves:${movesSequence}`, () =>
+  function testCorrectStatus(statement, expectedStatus, moves) {
+    it(`${statement}, moves:${moves}, field:${visualizeGameField(moves)}`, () =>
       pipe(
-        movesSequence.reduce(swap(makeMove), newGame),
+        moves.reduce(swap(makeMove), newGame),
         game => expect(game.status).toContain(expectedStatus)))
   }
 })
 
-
+// ДОПИЛИТЬ ВИЖУАЛ ТЕСТОВ, ПОПРАВИТЬ СТРОКИ
 describe('player can`t play illegal moves', () => {
   testIllegalMove(9)
   testIllegalMove(12)
@@ -73,7 +68,7 @@ describe('player can`t play illegal moves', () => {
   testIllegalMove(4, [0, 3, 1, 4, 6, 5])
 
   function testIllegalMove(illegalMove, playedMoves) {
-    it(`illegal move '${illegalMove}' is ignored, moves: ${playedMoves || 'new game'}`, () => {
+    it(`illegal move '${illegalMove}' is ignored\nmoves: ${playedMoves || 'new game'}\nfield:${visualizeGameField(playedMoves)}`, () => {
       const gameSoFar = playedMoves ? playedMoves.reduce(swap(makeMove), newGame) : newGame
       const afterIllegalMove = makeMove(illegalMove, gameSoFar)
 
@@ -81,3 +76,16 @@ describe('player can`t play illegal moves', () => {
     })
   }
 })
+
+
+function visualizeGameField(moves) {
+  const xo = n => n % 2 === 0 ? 'X' : 'O'
+  const addNewLines = (acc, x, i) => acc.concat(i % 3 == 0 ? `\n${x}` : x)
+
+  return pipe(
+    '---------'.split(''),
+    field => !moves ? field :
+    field.map((x, i) => moves.some(m => m == i) ? xo(i) : x),
+    field => field.reduce(addNewLines, []),
+  ).join('')
+}
