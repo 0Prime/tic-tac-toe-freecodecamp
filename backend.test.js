@@ -51,14 +51,14 @@ describe('game has correct status', () => {
   })
 
   function testCorrectStatus(statement, expectedStatus, moves) {
-    it(`${statement}, moves:${moves}, field:${visualizeGameField(moves)}`, () =>
+    it(`${statement}\nmoves: ${moves}\nfield:${visualizeGameField(moves)}`, () =>
       pipe(
         moves.reduce(swap(makeMove), newGame),
         game => expect(game.status).toContain(expectedStatus)))
   }
 })
 
-// ДОПИЛИТЬ ВИЖУАЛ ТЕСТОВ, ПОПРАВИТЬ СТРОКИ
+
 describe('player can`t play illegal moves', () => {
   testIllegalMove(9)
   testIllegalMove(12)
@@ -85,7 +85,9 @@ function visualizeGameField(moves) {
   return pipe(
     '---------'.split(''),
     field => !moves ? field :
-    field.map((x, i) => moves.some(m => m == i) ? xo(i) : x),
+    field.map((cell, cellIdx) => pipe(
+      moves.findIndex(move => move == cellIdx),
+      moveIdx => moveIdx != -1 ? xo(moveIdx) : cell)),
     field => field.reduce(addNewLines, []),
   ).join('')
 }
