@@ -1,14 +1,4 @@
-// tools
-const pipe = (x, f, ...fs) => f ? pipe(f(x), ...fs) : x
-
-const groupBy = (keyFn, xs) =>
-  xs.reduce((acc, x) => {
-    acc[keyFn(x)] = acc[keyFn(x)].concat(x)
-    return acc
-  }, {})
-
-const splitBy = (predicate, xs) =>
-  Object.values(groupBy(predicate, x))
+const { pipe } = require('./tools')
 
 
 const makeGame = (status, moves, playedMoves) => ({

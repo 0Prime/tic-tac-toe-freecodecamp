@@ -1,12 +1,9 @@
-const backend = require('./backend')
+const { pipe, swap } = require('./tools')
 
-// tools
-const swap = f => (a, b) => f(b, a)
-const pipe = (x, f, ...fs) => f ? pipe(f(x), ...fs) : x
+const backend = require('./backend')
+const makeMove = backend.makeMove
 
 const newGame = backend.newGame()
-
-const makeMove = backend.makeMove
 
 /*
 TODO: make 'visualize game field' helper function:
