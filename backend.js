@@ -40,8 +40,8 @@ const isGameOver = playedMoves =>
         lineArr.every(l => p2.includes(l)))))
 
 
-const xo = n => n % 2 === 0 ? 'O' : 'X'
-const winXO = ({ playedMoves }) => `win of player ${xo(playedMoves.length - 1)}`
+const xo = n => n % 2 === 0 ? 'X' : 'O'
+const winXO = ({ playedMoves }) => `win of player ${xo(playedMoves.length)}`
 const moveXO = ({ moves }) => `move of player ${xo(moves.length)}`
 
 
@@ -60,5 +60,6 @@ const makeMove = (move, game) =>
 
 module.exports = {
   newGame: newGame,
-  makeMove: makeMove
+  makeMove: makeMove,
+  allLines: allLines
 }

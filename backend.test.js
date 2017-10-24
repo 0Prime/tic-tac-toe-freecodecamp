@@ -1,5 +1,5 @@
 const { pipe, swap, curry } = require('./tools')
-
+const { visualizeGameField } = require('./testHelpers')
 
 const backend = require('./backend')
 const makeMove = backend.makeMove
@@ -43,12 +43,34 @@ describe('game has correct status', () => {
     testOngoing([0, 1, 2, 3, 4])
   })
 
+
+  describe(`ongoing game's status contains correct player symbol`, () => {
+    describe(`odd is X`, () => {
+      const testOngoing = curry(testCorrectStatus, `status contains 'X'`, 'X')
+
+      testOngoing([0, 1])
+      testOngoing([0, 1, 2, 3])
+      testOngoing([0, 1, 2, 3, 4, 5])
+    })
+
+
+    describe(`even is O`, () => {
+      const testOngoing = curry(testCorrectStatus, `status contains 'O'`, 'O')
+
+      testOngoing([0])
+      testOngoing([0, 1, 2])
+      testOngoing([0, 1, 2, 3, 4])
+    })
+  })
+
+
   describe('tied game`s status contains `tie`', () => {
     const testTie = curry(testCorrectStatus, 'status contains `tie`', 'tie')
 
     testTie([0, 1, 2, 3, 5, 4, 6, 8, 7])
     testTie([0, 1, 2, 4, 3, 5, 7, 6, 8])
   })
+
 
   function testCorrectStatus(statement, expectedStatus, moves) {
     it(`${statement}\nmoves: ${moves}\nfield:${visualizeGameField(moves)}`, () =>
@@ -76,18 +98,3 @@ describe('player can`t play illegal moves', () => {
     })
   }
 })
-
-
-function visualizeGameField(moves) {
-  const xo = n => n % 2 === 0 ? 'X' : 'O'
-  const addNewLines = (acc, x, i) => acc.concat(i % 3 == 0 ? `\n${x}` : x)
-
-  return pipe(
-    '---------'.split(''),
-    field => !moves ? field :
-    field.map((cell, cellIdx) => pipe(
-      moves.findIndex(move => move == cellIdx),
-      moveIdx => moveIdx != -1 ? xo(moveIdx) : cell)),
-    field => field.reduce(addNewLines, []),
-  ).join('')
-}
