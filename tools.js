@@ -1,9 +1,6 @@
 const pipe = (x, f, ...fs) => f ? pipe(f(x), ...fs) : x
 
 
-const swap = f => (a, b) => f(b, a)
-
-
 const curry = (f, ...args) => f.bind(undefined, ...args)
 
 
@@ -13,6 +10,9 @@ const autoCurry = f => function() {
     autoCurry(f.bind(undefined, ...args)) :
     f(...args)
 }
+
+
+const swap = autoCurry((f, a, b) => f(b, a))
 
 
 const last = xs => xs[xs.length - 1]

@@ -1,68 +1,59 @@
-const { pipe, splitBy, intersection, autoCurry, sortPair, isEven } = require('./tools')
-const { makeMove, allLines } = require('./backend')
+const { pipe, splitBy, intersection, autoCurry, sortPair, isEven, swap } = require('./tools')
+const backend = require('./backend')
+
+const canonize = s => s.split('').map(Number)
+
+const allLines = backend.allLines.map(canonize)
+const makeMove = swap(backend.makeMove)
 
 
-const priorities = [
-  [4],
-  [0, 2, 6, 8],
-  [1, 3, 5, 7]
-]
+const priorities = ['4', '0268', '1357'].map(canonize)
+const chooseBestMove = moves => priorities
+  .map(p => intersection(p, moves))
+  .find(x => x.length > 0)[0]
 
 
-const movesInLineCount = (moves, line) => line && moves ?
-  moves.filter(m => line.includes(m)).length : 0
-
-
-const linesFn = autoCurry((allLines, oMoves, eMoves, oCount, eCount) =>
-  allLines.filter(l =>
-    movesInLineCount(oMoves, l) === oCount &&
-    movesInLineCount(eMoves, l) === eCount))
-
-
-const splitMovesFn = moves =>
-  sortPair(isEven(moves.length), splitBy((x, i) => isEven(i), moves))
-
-
-const movesFn = autoCurry((moves, lines) =>
+const findMoves = autoCurry((moves, lines) =>
   moves.filter(m => lines.some(l => l.includes(m))))
 
 
-const chooseBestMove = autoCurry((priorities, moves) => priorities
-  .map(p => intersection(p, moves))
-  .find(x => x.length > 0)[0])
+const splitToOwnAndEnemy = moves =>
+  sortPair(isEven(moves.length), splitBy((x, i) => isEven(i), moves))
 
 
-const findMove = (moves, playedMoves, allLines) => pipe(
-  linesFn(allLines, ...splitMovesFn(playedMoves)),
-  linesFn => pipe(
-    [linesFn(2, 0), linesFn(0, 2), intersection(linesFn(1, 0), linesFn(0, 1)), allLines]
+const findLinesByMovesCount = autoCurry((oMoves, eMoves, oCount, eCount) => pipe(
+  (moves, line) => line && moves ? moves.filter(m => line.includes(m)).length : 0,
+  movesInLineCount => allLines.filter(l =>
+    movesInLineCount(oMoves, l) === oCount &&
+    movesInLineCount(eMoves, l) === eCount)))
+
+
+const findMove = (moves, playedMoves) => pipe(
+  findLinesByMovesCount(...splitToOwnAndEnemy(playedMoves)),
+  findLines => pipe(
+    [findLines(2, 0), findLines(0, 2), intersection(findLines(1, 0), findLines(0, 1)), allLines]
     .find(ls => ls.length > 0),
-    movesFn(moves),
-    chooseBestMove(priorities)))
+    findMoves(moves),
+    chooseBestMove))
 
 
-const moveAI = game => {
-  const moves = game.moves.split('').map(Number)
-  const pMoves = game.playedMoves.split('').map(Number)
-  const aLines = allLines.map(l => l.split('').map(Number))
+/**
+ * priorities:
+ * 1. make win move
+ * 2. block enemy win move
+ * 3. block enemy line while making move on own line
+ * 4. just move
 
-  return makeMove(findMove(moves, pMoves, aLines), game)
-}
+ * move priorities:
+ * a. center
+ * b. corners
+ * c. other
+ */
+const moveAI = game => pipe(
+  findMove(canonize(game.moves), canonize(game.playedMoves)),
+  makeMove(game))
 
 
 module.exports = {
   moveAI: moveAI
 }
-
-/**
-[1] priorities:
-1. make win move
-2. block enemy win move
-3. block enemy line while making move on own line & [2]
-4. just move & [2]
-
-[2] move priorities:
-a. center
-b. corners
-c. other
-*/

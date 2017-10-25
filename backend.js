@@ -1,4 +1,4 @@
-const { pipe } = require('./tools')
+const { pipe, autoCurry } = require('./tools')
 
 
 const makeGame = (status, moves, playedMoves) => ({
@@ -45,7 +45,7 @@ const winXO = ({ playedMoves }) => `win of player ${xo(playedMoves.length)}`
 const moveXO = ({ moves }) => `move of player ${xo(moves.length)}`
 
 
-const makeMove = (move, game) =>
+const makeMove = autoCurry((move, game) =>
   game.moves.split('').some(possibleMove => String(move) === possibleMove) ?
   pipe(
     [game.playedMoves.concat(move), game.moves.replace(move, '')],
@@ -55,7 +55,7 @@ const makeMove = (move, game) =>
     isGameOver(playedMoves) ?
     makeGame(winXO(game), '', playedMoves) :
     makeGame(moveXO(game), moves, playedMoves)) :
-  game
+  game)
 
 
 module.exports = {
