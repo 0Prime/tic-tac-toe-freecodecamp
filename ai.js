@@ -1,74 +1,68 @@
-const { pipe, splitBy, swap, curry } = require('./tools')
+const { pipe, splitBy, swap, curry, intersection, autocurry, sortPair, isEven } = require('./tools')
 const { makeMove, allLines } = require('./backend')
 
 
-const isEven = x => x % 2 === 0
-const isOdd = x => x % 2 !== 0
+const movesInLineCount = (moves, line) => line && moves ?
+  moves.filter(m => line.includes(m)).length : 0
 
 
-const numberOfMovesPlayedInLine = (moves, line) =>
-  line && moves ? line.split('').filter(cell => moves.includes(cell)).length : 0
+const linesFn = autocurry((allLines, oMoves, eMoves, oCount, eCount) =>
+  allLines.filter(l =>
+    movesInLineCount(oMoves, l) === oCount &&
+    movesInLineCount(eMoves, l) === eCount))
 
 
-const isWinningLine = (moves, line) =>
-  numberOfMovesPlayedInLine(moves, line) === 2
+const splitMovesFn = moves =>
+  sortPair(isEven(moves.length), splitBy((x, i) => isEven(i), moves))
+
+
+const movesFn = autocurry((moves, lines) =>
+  moves.filter(m => lines.some(l => l.includes(m))))
+
+
+const priorities = [
+  [4],
+  [0, 2, 6, 8],
+  [1, 3, 5, 7]
+]
+const bestMoveFn = moves => priorities
+  .map(p => intersection(p, moves))
+  .find(x => x.length > 0)[0]
+
+
+const moveFn = (moves, linesFn, allLines) => pipe(
+  [linesFn(2, 0), linesFn(0, 2), intersection(linesFn(1, 0), linesFn(0, 1)), allLines]
+  .find(ls => ls.length > 0),
+  movesFn(moves),
+  bestMoveFn)
+
+
+const blah = (moves, playedMoves, allLines) =>
+  moveFn(moves, linesFn(allLines, ...splitMovesFn(playedMoves)), allLines)
 
 
 const moveAI = game => {
-  const center = '4'
-  const { playedMoves, moves } = game
+  const moves = game.moves.split('').map(Number)
+  const pMoves = game.playedMoves.split('').map(Number)
+  const aLines = allLines.map(l => l.split('').map(Number))
 
-  if (moves.includes(center))
-    return makeMove(center, game)
-
-  const isXMove = isEven(playedMoves.length)
-  const [xMoves, oMoves] = splitBy((x, i) => isEven(i), playedMoves.split(''))
-  const [ownMoves, enemyMoves] = isXMove ? [xMoves, oMoves] : [oMoves, xMoves]
-
-
-  const winningMove = playerMoves => moves.split('').find(move => allLines.find(curry(isWinningLine, playerMoves)) && allLines.find(curry(isWinningLine, playerMoves)).includes(move))
-
-
-  const [ownWinningMove, enemyWinningMove] = [ownMoves, enemyMoves].map(winningMove)
-
-
-  if (ownWinningMove)
-    return makeMove(ownWinningMove, game)
-  if (enemyWinningMove)
-    return makeMove(enemyWinningMove, game)
-
-
-  const affectedLines = move => allLines.filter(l => l.split('').includes(move))
-
-
-  const hasAffectedLineWithParams = (ownMovesCount, enemyMovesCount, move) =>
-    affectedLines(move).find(line =>
-      numberOfMovesPlayedInLine(ownMoves, line) === ownMovesCount &&
-      numberOfMovesPlayedInLine(enemyMoves, line) === enemyMovesCount) !== undefined
-
-
-  const hasAffectedLineWithOnlyOneOwnMark = curry(hasAffectedLineWithParams, 1, 0)
-  const hasAffectedLineWithOnlyOneEnemyMark = curry(hasAffectedLineWithParams, 0, 1)
-
-
-  const blockWinMoves = moves.split('').filter(m => hasAffectedLineWithOnlyOneOwnMark(m) && hasAffectedLineWithOnlyOneEnemyMark(m))
-
-
-  const corners = '0268'
-
-
-  const aiMove = (blockWinMoves.length > 0 ?
-    blockWinMoves.filter(m => corners.includes(m)).length > 0 ?
-    blockWinMoves.filter(m => corners.includes(m)) : blockWinMoves :
-    moves.split('').filter(m =>
-      corners.includes(m)).length > 0 ? moves.split('').filter(m =>
-      corners.includes(m)) :
-    moves.split(''))[0]
-
-  return makeMove(aiMove, game)
+  return makeMove(blah(moves, pMoves, aLines), game)
 }
 
 
 module.exports = {
   moveAI: moveAI
 }
+
+/**
+[1] priorities:
+1. make win move
+2. block enemy win move
+3. block enemy line while making move on own line & [2]
+4. just move & [2]
+
+[2] move priorities:
+a. center
+b. corners
+c. other
+*/

@@ -7,6 +7,14 @@ const swap = f => (a, b) => f(b, a)
 const curry = (f, ...args) => f.bind(undefined, ...args)
 
 
+const autocurry = f => function() {
+  const args = Array.from(arguments)
+  return args.length < f.length ?
+    autocurry(f.bind(undefined, ...args)) :
+    f(...args)
+}
+
+
 const last = xs => xs[xs.length - 1]
 
 
@@ -18,16 +26,32 @@ const groupBy = (keyFn, xs) =>
   }, {})
 
 
-const splitBy = (predicate, xs) =>
-  pipe(groupBy(predicate, xs), Object.values)
+const splitBy = (predicate, xs) => xs.length > 0 ?
+  pipe(groupBy(predicate, xs), Object.values) : [
+    [],
+    []
+  ]
 
 
+const intersection = (xs, ys) => xs.filter(x => ys.includes(x))
+
+
+const sortPair = autocurry((predicate, [x, y]) => predicate ? [x, y] : [y, x])
+
+
+const isEven = x => x % 2 === 0
+const isOdd = x => x % 2 !== 0
 
 module.exports = {
   pipe: pipe,
   swap: swap,
   curry: curry,
+  autocurry: autocurry,
   last: last,
   groupBy: groupBy,
-  splitBy: splitBy
+  splitBy: splitBy,
+  intersection: intersection,
+  sortPair: sortPair,
+  isEven: isEven,
+  isOdd: isOdd
 }
