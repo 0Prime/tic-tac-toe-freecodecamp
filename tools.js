@@ -7,10 +7,10 @@ const swap = f => (a, b) => f(b, a)
 const curry = (f, ...args) => f.bind(undefined, ...args)
 
 
-const autocurry = f => function() {
+const autoCurry = f => function() {
   const args = Array.from(arguments)
   return args.length < f.length ?
-    autocurry(f.bind(undefined, ...args)) :
+    autoCurry(f.bind(undefined, ...args)) :
     f(...args)
 }
 
@@ -36,7 +36,7 @@ const splitBy = (predicate, xs) => xs.length > 0 ?
 const intersection = (xs, ys) => xs.filter(x => ys.includes(x))
 
 
-const sortPair = autocurry((predicate, [x, y]) => predicate ? [x, y] : [y, x])
+const sortPair = autoCurry((predicate, [x, y]) => predicate ? [x, y] : [y, x])
 
 
 const isEven = x => x % 2 === 0
@@ -47,7 +47,7 @@ module.exports = {
   pipe: pipe,
   swap: swap,
   curry: curry,
-  autocurry: autocurry,
+  autoCurry: autoCurry,
   last: last,
   groupBy: groupBy,
   splitBy: splitBy,
