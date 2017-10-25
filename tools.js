@@ -26,11 +26,8 @@ const groupBy = (keyFn, xs) =>
   }, {})
 
 
-const splitBy = (predicate, xs) => xs.length > 0 ?
-  pipe(groupBy(predicate, xs), Object.values) : [
-    [],
-    []
-  ]
+const splitBy = (predicate, xs) =>
+  pipe(groupBy(predicate, xs), Object.values)
 
 
 const intersection = (xs, ys) => xs.filter(x => ys.includes(x))

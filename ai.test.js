@@ -1,4 +1,4 @@
-const { last, pipe, swap } = require('./tools')
+const { pipe, swap } = require('./tools')
 const { visualizeGameField } = require('./testHelpers')
 
 const backend = require('./backend')
@@ -7,24 +7,16 @@ const makeMove = backend.makeMove
 
 const newGame = backend.newGame()
 
-const ai = require('./ai')
-const moveAI = ai.moveAI
+const { moveAI } = require('./ai')
 
 
-describe('ai', () => {
-  it(`first move is center`, () => {
-    const game = moveAI(newGame)
-    expect(game.playedMoves).toContain(4)
-  })
+describe(`ai`, () => {
+  describe(`first move is center`, () =>
+    testMove([], /[4]/))
 
 
-  it(`second to center move is corner`, () => {
-    const game = makeMove(4, newGame)
-
-    const expectedMoves = /[0268]/
-
-    expect(moveAI(game).playedMoves).toMatch(expectedMoves)
-  })
+  describe(`second to center move is corner`, () =>
+    testMove([4], /[0268]/))
 
 
   describe(`is making winning moves`, () => {
@@ -44,10 +36,12 @@ describe('ai', () => {
 
   describe(`is creating wining move while blocking enemy at same time`, () => {
     testMove([4, 0], /[62]/)
+    testMove([4, 6], /[08]/)
+    testMove([2, 4], /[068]/)
   })
 
 
-  it(`two AI allways tie themselves`, () => {
+  it(`two AI tie themselves`, () => {
     const finishedGame = pipe(
       newGame,
       moveAI, moveAI, moveAI,
