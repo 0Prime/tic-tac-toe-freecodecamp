@@ -42,6 +42,7 @@ const sortPair = autocurry((predicate, [x, y]) => predicate ? [x, y] : [y, x])
 const isEven = x => x % 2 === 0
 const isOdd = x => x % 2 !== 0
 
+
 module.exports = {
   pipe: pipe,
   swap: swap,
