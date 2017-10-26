@@ -20,10 +20,10 @@ const splitToOwnAndEnemy = moves =>
   sortPair(isEven(moves.length), splitToXO(moves))
 
 
-const findLinesByMovesCount = autoCurry((aMoves, bMoves, aCount, bCount) =>
+const findLinesByMovesCount = autoCurry((oMoves, eMoves, oCount, eCount) =>
   allLines.filter(l =>
-    movesInLineCount(aMoves, l) === aCount &&
-    movesInLineCount(bMoves, l) === bCount))
+    movesInLineCount(oMoves, l) === oCount &&
+    movesInLineCount(eMoves, l) === eCount))
 
 
 const findMove = (moves, playedMoves) => pipe(
