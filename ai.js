@@ -1,8 +1,7 @@
 const { pipe, splitBy, intersection, autoCurry, sortPair, isEven, swap } = require('./tools')
+const { splitToXO, movesInLineCount, canonize } = require('./backend')
+
 const backend = require('./backend')
-
-const canonize = s => s.split('').map(Number)
-
 const allLines = backend.allLines.map(canonize)
 const makeMove = swap(backend.makeMove)
 
@@ -18,14 +17,13 @@ const findMoves = autoCurry((moves, lines) =>
 
 
 const splitToOwnAndEnemy = moves =>
-  sortPair(isEven(moves.length), splitBy((x, i) => isEven(i), moves))
+  sortPair(isEven(moves.length), splitToXO(moves))
 
 
-const findLinesByMovesCount = autoCurry((oMoves, eMoves, oCount, eCount) => pipe(
-  (moves, line) => line && moves ? moves.filter(m => line.includes(m)).length : 0,
-  movesInLineCount => allLines.filter(l =>
-    movesInLineCount(oMoves, l) === oCount &&
-    movesInLineCount(eMoves, l) === eCount)))
+const findLinesByMovesCount = autoCurry((aMoves, bMoves, aCount, bCount) =>
+  allLines.filter(l =>
+    movesInLineCount(aMoves, l) === aCount &&
+    movesInLineCount(bMoves, l) === bCount))
 
 
 const findMove = (moves, playedMoves) => pipe(

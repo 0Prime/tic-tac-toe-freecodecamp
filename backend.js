@@ -1,4 +1,4 @@
-const { pipe, autoCurry } = require('./tools')
+const { pipe, autoCurry, isEven, splitBy } = require('./tools')
 
 
 const makeGame = (status, moves, playedMoves) => ({
@@ -18,48 +18,44 @@ const allLines = [
 ]
 
 
-const sortByPlayer = playedMoves =>
-  playedMoves
-  .split('')
-  .reduce((acc, m, i) => {
-    acc[i % 2] = acc[i % 2].concat(m)
-    return acc
-  }, ['', ''])
-  .map(l => l.split('').sort().join(''))
+const movesInLineCount = (moves, line) => moves && line ?
+  moves.filter(m => line.includes(m)).length : 0
 
 
-const isGameOver = playedMoves =>
-  pipe(
-    sortByPlayer(playedMoves),
-    ([p1, p2]) =>
-    allLines.some(line =>
-      pipe(
-        line.split(''),
-        lineArr =>
-        lineArr.every(l => p1.includes(l)) ||
-        lineArr.every(l => p2.includes(l)))))
+const splitToXO = moves => splitBy((x, i) => isEven(i), moves)
+
+
+const canonize = s => s.split('').map(Number)
+
+
+const isGameOver = moves => pipe(
+  splitToXO(moves),
+  ([xMoves, oMoves]) =>
+  allLines.find(l =>
+    movesInLineCount(xMoves, l) === 3 ||
+    movesInLineCount(oMoves, l) === 3))
 
 
 const xo = n => n % 2 === 0 ? 'X' : 'O'
-const winXO = ({ playedMoves }) => `win of player ${xo(playedMoves.length)}`
-const moveXO = ({ moves }) => `move of player ${xo(moves.length)}`
+const winXO = moves => `win of player ${xo(moves.length)}`
+const moveXO = moves => `move of player ${xo(moves.length)}`
 
 
 const makeMove = autoCurry((move, game) =>
-  game.moves.split('').some(possibleMove => String(move) === possibleMove) ?
-  pipe(
+  canonize(game.moves).includes(move) ? pipe(
     [game.playedMoves.concat(move), game.moves.replace(move, '')],
-    ([playedMoves, moves]) =>
-    playedMoves.length === 9 ?
-    makeGame('tie', '', playedMoves) :
-    isGameOver(playedMoves) ?
-    makeGame(winXO(game), '', playedMoves) :
-    makeGame(moveXO(game), moves, playedMoves)) :
+    ([newPlayedMoves, newMoves]) =>
+    newPlayedMoves.length === 9 ? makeGame('tie', '', newPlayedMoves) :
+    isGameOver(canonize(newPlayedMoves)) ? makeGame(winXO(game.playedMoves), '', newPlayedMoves) :
+    makeGame(moveXO(game.moves), newMoves, newPlayedMoves)) :
   game)
 
 
 module.exports = {
   newGame: newGame,
   makeMove: makeMove,
-  allLines: allLines
+  allLines: allLines,
+  splitToXO: splitToXO,
+  movesInLineCount: movesInLineCount,
+  canonize: canonize
 }
