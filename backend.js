@@ -36,7 +36,7 @@ const isGameOver = moves => pipe(
     movesInLineCount(oMoves, l) === 3))
 
 
-const xo = n => n % 2 === 0 ? 'X' : 'O'
+const xo = n => isEven(n) ? 'X' : 'O'
 const winXO = moves => `win of player ${xo(moves.length)}`
 const moveXO = moves => `move of player ${xo(moves.length)}`
 
