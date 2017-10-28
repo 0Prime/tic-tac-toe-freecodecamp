@@ -1,4 +1,4 @@
-const { pipe, swap } = require('./tools')
+const { pipe, swap, last } = require('./tools')
 const { visualizeGameField } = require('./testHelpers')
 
 const backend = require('./backend')
@@ -41,6 +41,15 @@ describe(`ai`, () => {
   })
 
 
+  describe(`is blocking diagonal double threat`, () => {
+    const testFor = moves => testMove(moves, /[1357]/)
+    testFor([6, 4, 2])
+    testFor([2, 4, 6])
+    testFor([0, 4, 8])
+    testFor([8, 4, 0])
+  })
+
+
   it(`two AI tie themselves`, () => {
     const finishedGame = pipe(
       newGame,
@@ -56,9 +65,9 @@ describe(`ai`, () => {
 function testMove(moves, expectedMoves) {
   const gameSoFar = moves.reduce(swap(makeMove), newGame)
 
-  it(`expected ${gameSoFar.status} to ${expectedMoves}\nfield: ${visualizeGameField(moves)}`, () => {
+  it(`expected ${gameSoFar.status} to ${expectedMoves}\nmoves: ${gameSoFar.playedMoves}\nfield: ${visualizeGameField(moves)}`, () => {
     const finishedGame = moveAI(gameSoFar)
 
-    expect(finishedGame.playedMoves).toMatch(expectedMoves)
+    expect(last(finishedGame.playedMoves)).toMatch(expectedMoves)
   })
 }

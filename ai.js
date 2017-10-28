@@ -1,15 +1,18 @@
-const { pipe, splitBy, intersection, autoCurry, sortPair, isEven, swap } = require('./tools')
+const { pipe, splitBy, intersection, autoCurry, sortPair, isEven, swap, equals } = require('./tools')
 const { splitToXO, movesInLineCount, canonize } = require('./backend')
 
 const backend = require('./backend')
 const allLines = backend.allLines.map(canonize)
 const makeMove = swap(backend.makeMove)
 
-
+const field = { center: '4', corners: '0268', other: '1357' }
 const priorities = ['4', '0268', '1357'].map(canonize)
-const chooseBestMove = moves => priorities
+const chooseBestMove = autoCurry((oMoves, eMoves, moves) => ['26', '08']
+  .map(canonize)
+  .some(ms => eMoves && equals(ms, eMoves.sort())) && moves.length === 6 ? 1 :
+  priorities
   .map(p => intersection(p, moves))
-  .find(x => x.length > 0)[0]
+  .find(x => x.length > 0)[0])
 
 
 const findMoves = autoCurry((moves, lines) =>
@@ -32,7 +35,7 @@ const findMove = (moves, playedMoves) => pipe(
     [findLines(2, 0), findLines(0, 2), intersection(findLines(1, 0), findLines(0, 1)), allLines]
     .find(ls => ls.length > 0),
     findMoves(moves),
-    chooseBestMove))
+    chooseBestMove(...splitToOwnAndEnemy(playedMoves))))
 
 
 /**

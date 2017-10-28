@@ -40,6 +40,10 @@ const isEven = x => x % 2 === 0
 const isOdd = x => x % 2 !== 0
 
 
+const equals = autoCurry((xs, ys) =>
+  xs.length === ys.length && xs.every((x, i) => x === ys[i]))
+
+
 module.exports = {
   pipe: pipe,
   swap: swap,
@@ -51,5 +55,6 @@ module.exports = {
   intersection: intersection,
   sortPair: sortPair,
   isEven: isEven,
-  isOdd: isOdd
+  isOdd: isOdd,
+  equals: equals
 }
