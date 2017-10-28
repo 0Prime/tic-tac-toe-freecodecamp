@@ -6,16 +6,28 @@ const allLines = backend.allLines.map(canonize)
 const makeMove = swap(backend.makeMove)
 
 
+const mapEmptyToNull = autoCurry((f, x) =>
+  pipe(f(x), xs => xs.length > 0 ? xs : null))
+
+
 const field = { center: [4], corners: [0, 2, 6, 8], other: [1, 3, 5, 7] }
-const priorities = pipe(field, ({ center, corners, other }) => [center, corners, other])
-const chooseBestMove = autoCurry((oMoves, eMoves, moves) => anyOf([
-    [2, 6],
-    [0, 8]
-  ]
-  .some(ms => eMoves && equals(ms, eMoves.sort())) && moves.length === 6 ? field.other :
-  priorities
-  .map(p => intersection(p, moves))
-  .find(x => x.length > 0)))
+
+
+const isDiagonalDoubleThreat = (eMoves = []) => pipe(
+  equals(eMoves.sort()),
+  isTaken => isTaken([0, 8]) || isTaken([2, 6]))
+
+
+const chooseBestMove = autoCurry((oMoves, eMoves, moves) => pipe(
+  isDiagonalDoubleThreat(eMoves) ? field.other :
+  pipe(moves,
+    intersection,
+    mapEmptyToNull,
+    intersectionWith =>
+    intersectionWith(field.center) ||
+    intersectionWith(field.corners) ||
+    intersectionWith(field.other)),
+  anyOf))
 
 
 const findMoves = autoCurry((moves, lines) =>

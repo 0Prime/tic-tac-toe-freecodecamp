@@ -30,7 +30,7 @@ const splitBy = (predicate, xs) =>
   pipe(groupBy(predicate, xs), Object.values)
 
 
-const intersection = (xs, ys) => xs.filter(x => ys.includes(x))
+const intersection = autoCurry((xs, ys) => xs.filter(x => ys.includes(x)))
 
 
 const sortPair = autoCurry((predicate, [x, y]) => predicate ? [x, y] : [y, x])
