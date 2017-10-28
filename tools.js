@@ -44,6 +44,9 @@ const equals = autoCurry((xs, ys) =>
   xs.length === ys.length && xs.every((x, i) => x === ys[i]))
 
 
+const anyOf = xs => xs[Math.floor(Math.random() * xs.length)]
+
+
 module.exports = {
   pipe: pipe,
   swap: swap,
@@ -56,5 +59,6 @@ module.exports = {
   sortPair: sortPair,
   isEven: isEven,
   isOdd: isOdd,
-  equals: equals
+  equals: equals,
+  anyOf: anyOf
 }

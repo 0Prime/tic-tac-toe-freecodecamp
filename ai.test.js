@@ -35,8 +35,8 @@ describe(`ai`, () => {
 
 
   describe(`is creating wining move while blocking enemy at same time`, () => {
-    testMove([4, 0], /[62]/)
-    testMove([4, 6], /[08]/)
+    testMove([4, 0], /[268]/)
+    testMove([4, 6], /[028]/)
     testMove([2, 4], /[068]/)
   })
 

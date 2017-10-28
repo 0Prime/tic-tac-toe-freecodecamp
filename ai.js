@@ -1,18 +1,21 @@
-const { pipe, splitBy, intersection, autoCurry, sortPair, isEven, swap, equals } = require('./tools')
+const { pipe, splitBy, intersection, autoCurry, sortPair, isEven, swap, equals, anyOf } = require('./tools')
 const { splitToXO, movesInLineCount, canonize } = require('./backend')
 
 const backend = require('./backend')
 const allLines = backend.allLines.map(canonize)
 const makeMove = swap(backend.makeMove)
 
-const field = { center: '4', corners: '0268', other: '1357' }
-const priorities = ['4', '0268', '1357'].map(canonize)
-const chooseBestMove = autoCurry((oMoves, eMoves, moves) => ['26', '08']
-  .map(canonize)
-  .some(ms => eMoves && equals(ms, eMoves.sort())) && moves.length === 6 ? 1 :
+
+const field = { center: [4], corners: [0, 2, 6, 8], other: [1, 3, 5, 7] }
+const priorities = pipe(field, ({ center, corners, other }) => [center, corners, other])
+const chooseBestMove = autoCurry((oMoves, eMoves, moves) => anyOf([
+    [2, 6],
+    [0, 8]
+  ]
+  .some(ms => eMoves && equals(ms, eMoves.sort())) && moves.length === 6 ? field.other :
   priorities
   .map(p => intersection(p, moves))
-  .find(x => x.length > 0)[0])
+  .find(x => x.length > 0)))
 
 
 const findMoves = autoCurry((moves, lines) =>
